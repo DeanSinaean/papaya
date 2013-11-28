@@ -60,7 +60,7 @@ void k_write(void){
 
 }
 //eax=7
-void k_close(fd){
+void k_close(int fd){
 	ACTIVE_SLEEP(pcb_table_info.curr_pid);
 	askfs(COMMAND_CLOSE,0,0,fd,0,0,0,0);
 }

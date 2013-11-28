@@ -1,6 +1,6 @@
 global idle,p1,p2
-p0_addr equ 0xb8000
 global p0_addr
+p0_addr equ 0xb8000
 [section .text]
 ;runing at ring0
 idle:

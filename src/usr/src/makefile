@@ -12,8 +12,6 @@ all: $(libdir) sys_call.o utils.o asmtask.o unistd.o
 
 $(libdir):
 	mkdir -p $(libdir)
-	echo 'library directory prepared!'
-
 
 sys_call.o:sys_call.asm
 	$(asm) -felf -o ../lib/sys_call.o sys_call.asm $(asmflags)
@@ -27,3 +25,4 @@ unistd.o:unistd.c ../include/unistd.h
 	$(cc) -c -o ../lib/unistd.o unistd.c $(cflags)
 clean:
 	rm -rf $(libdir)
+	rm -rf *.o

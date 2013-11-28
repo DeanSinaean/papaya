@@ -6,7 +6,7 @@ VPATH=../lib/ ../bin/
 #'$(head_path)' under this case,because other unrelated cflags may affect the 
 #operation of 'gcc -M',according to by test.
 cheader_path=-I../include/ -I./usr/include/
-cflags=$(cheader_path) -Wall -std=c99 -fno-builtin -g 
+cflags=$(cheader_path) -Wall -std=c99 -fno-builtin -g -Wno-unused-variable -Wno-unused-function
 asmflags=-i../include/ -i./usr/include/
 ldpath=-L../lib/
 
@@ -22,7 +22,12 @@ ku_utils.o hs.o  fs_ext.o struinfo.o  mm.o fs.o tty.o
 kernelrelyo=$(asmo) $(usro)  $(co)
 include $(co:.o=.d)
 
+$(usro):
+	cd usr/src;\
+	make
+
 boot.bin:boot.asm
+	-mkdir ../bin;\
 	nasm -o ../bin/boot.bin boot.asm
 kernel.elf:$(kernelrelyo)
 	cd ../lib/;\
@@ -36,14 +41,18 @@ kernel.elf:$(kernelrelyo)
 	sed 's\:\ $@: \'  this_is_a_tmp_file  > $@;\
 	rm  -f this_is_a_tmp_file
 
-%.o:%.c
+%.o:%.c ../lib
 	gcc -c -o ../lib/$@ $< $(cflags)
 
-%.asmo: %.asm ../include/*.inc
+%.asmo: %.asm ../include/*.inc ../lib
 	nasm -felf -o ../lib/$@ $< $(asmflags)
+../lib:
+	mkdir ../lib
 clean:
-	rm  -f ../lib/*;\
-	rm -f *.d;
+	rm  -Rf ../lib;\
+	rm -Rf ../bin;\
+	rm -f *.d;\
+	cd usr/src && make clean;
 #replace your 400m.img to after using make git
 git:
 	rm  -f ../lib/*;rm -f ../bin/*;rm -f *.d;\
@@ -51,32 +60,3 @@ git:
 	rm -f usr/lib/*;\
 	mv ../cmd/400m.img ../..
 .PHONY:all
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
