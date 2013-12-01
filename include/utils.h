@@ -55,4 +55,5 @@ void del_node(EMPTY_BLOCK*block);
 void insert_after(EMPTY_BLOCK*mother,EMPTY_BLOCK*block);
 boolean strmatch(char*seg,char*whole);
 void info_heap(void);
+boolean loadfile(char*path,char*addr);
 #endif

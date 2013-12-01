@@ -203,31 +203,7 @@ unsigned char obuffer_shift(OBUFFER* pt_obuffer);
 int getEmpty(void);
 int pickEmpty(void);
 void kill(int pid);
+void syscall_ret(int return_val,int return_errno);
+void syscall_soft_ret_to(int pid,int return_val,int return_errno);
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

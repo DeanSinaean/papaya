@@ -1,0 +1,10 @@
+*.d
+*.o
+bin/
+lib/
+cmd/400m.img
+cmd/a.img
+cmd/dimg
+tree.init.ign
+
+
