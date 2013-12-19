@@ -22,6 +22,7 @@ extern kernel_c
 extern cCallDispStr
 extern init8259A
 extern proc_dispatch
+extern ehciIRQHandler 
 
 ;edi equ 7e00h
 base_kernelStack equ 0fffeh ; kernel-stack range from  0fffeh to 7f00h,about 32kb
@@ -200,6 +201,17 @@ i21h:
 	mov esp, [kernel_esp]
 	jmp key_handler
 
+; usb ehci interrupt
+i27h:
+	save
+	mov esp, [kernel_esp]
+	jmp ehciIRQHandler 
+; usb ehci interrupt, 2
+i2bh:
+	save
+	mov esp, [kernel_esp]
+	jmp ehciIRQHandler 
+
 i2fh:
 	save
 	mov esp, [kernel_esp]
@@ -310,31 +322,43 @@ gdtPtr:
 
 ;{gate for idt
 idt:
-.gate_divide_error       : Gate selector_plain_c0, divide_error - _start + base_text,           0, DA_386IGate
-.gate_single_step        : Gate selector_plain_c0, single_step - _start + base_text,            0, DA_386IGate 
-.gate_nmi                : Gate selector_plain_c0, nmi - _start + base_text,                    0, DA_386IGate 
-.gate_breakPoint         : Gate selector_plain_c0, breakPoint - _start + base_text,             0, DA_386IGate 
-.gate_overflow           : Gate selector_plain_c0, overflow - _start + base_text,               0, DA_386IGate 
-.gate_bounds_check       : Gate selector_plain_c0, bounds_check - _start + base_text,           0, DA_386IGate 
-.gate_inval_opcode       : Gate selector_plain_c0, inval_opcode - _start + base_text,           0, DA_386IGate 
-.gate_copr_not_avialable : Gate selector_plain_c0, copr_not_avialable - _start + base_text,     0, DA_386IGate 
-.gate_double_fault       : Gate selector_plain_c0, double_fault - _start + base_text,           0, DA_386IGate 
-.gate_copr_seg_overrun   : Gate selector_plain_c0, copr_seg_overrun - _start + base_text,       0, DA_386IGate 
-.gate_inval_tss          : Gate selector_plain_c0, inval_tss - _start + base_text,              0, DA_386IGate 
-.gate_segment_not_present: Gate selector_plain_c0, segment_not_present - _start + base_text,    0, DA_386IGate 
-.gate_stack_error        : Gate selector_plain_c0, stack_error -_start + base_text,             0, DA_386IGate 
-.gate_general_protection : Gate selector_plain_c0, general_protection - _start + base_text,     0, DA_386IGate 
-.gate_page_fault         : Gate selector_plain_c0, page_fault - _start + base_text,             0, DA_386IGate 
-.gate_copr_error         : Gate selector_plain_c0, copr_error - _start + base_text,             0, DA_386IGate 
+.gate_divide_error       : Gate selector_plain_c0, divide_error - _start + base_text,           0, DA_386IGate ;0
+.gate_single_step        : Gate selector_plain_c0, single_step - _start + base_text,            0, DA_386IGate ;1 
+.gate_nmi                : Gate selector_plain_c0, nmi - _start + base_text,                    0, DA_386IGate ;2
+.gate_breakPoint         : Gate selector_plain_c0, breakPoint - _start + base_text,             0, DA_386IGate ;3
+.gate_overflow           : Gate selector_plain_c0, overflow - _start + base_text,               0, DA_386IGate ;4 
+.gate_bounds_check       : Gate selector_plain_c0, bounds_check - _start + base_text,           0, DA_386IGate ;5
+.gate_inval_opcode       : Gate selector_plain_c0, inval_opcode - _start + base_text,           0, DA_386IGate ;6 
+.gate_copr_not_avialable : Gate selector_plain_c0, copr_not_avialable - _start + base_text,     0, DA_386IGate ;7 
+.gate_double_fault       : Gate selector_plain_c0, double_fault - _start + base_text,           0, DA_386IGate ;8 
+.gate_copr_seg_overrun   : Gate selector_plain_c0, copr_seg_overrun - _start + base_text,       0, DA_386IGate ;9 
+.gate_inval_tss          : Gate selector_plain_c0, inval_tss - _start + base_text,              0, DA_386IGate ;10 
+.gate_segment_not_present: Gate selector_plain_c0, segment_not_present - _start + base_text,    0, DA_386IGate ;11 
+.gate_stack_error        : Gate selector_plain_c0, stack_error -_start + base_text,             0, DA_386IGate ;12 
+.gate_general_protection : Gate selector_plain_c0, general_protection - _start + base_text,     0, DA_386IGate ;13 
+.gate_page_fault         : Gate selector_plain_c0, page_fault - _start + base_text,             0, DA_386IGate ;14 
+.gate_copr_error         : Gate selector_plain_c0, copr_error - _start + base_text,             0, DA_386IGate ;15 
 
 %rep (0x20-16) ; 0-15,totally 16 gates,0-0x19,totally 0x20 gates,use (0x20-16)
 Gate selector_plain_c0, i80 - _start + base_text, 0, DA_386IGate
 %endrep
 
-.gate_i20h:Gate selector_plain_c0,i20h - _start + base_text, 0, DA_386IGate + DA_DPL3 ;ERR dpl3
-.gate_i21h:Gate selector_plain_c0,i21h - _start + base_text, 0, DA_386IGate
+.gate_i20h:Gate selector_plain_c0,i20h - _start + base_text, 0, DA_386IGate + DA_DPL3 ;ERR dpl3, irq0
+.gate_i21h:Gate selector_plain_c0,i21h - _start + base_text, 0, DA_386IGate           ;irq1
 
-%rep (0x2f-0x22)
+%rep (0x27-0x22)
+Gate selector_plain_c0, i2fh -_start + base_text, 0, DA_386IGate
+%endrep
+
+.gate_i27h:Gate selector_plain_c0,i27h - _start + base_text, 0, DA_386IGate           ;usb ehci for the moment
+
+%rep (0x2b-0x28)
+Gate selector_plain_c0, i2fh -_start + base_text, 0, DA_386IGate
+%endrep
+
+.gate_i2bh:Gate selector_plain_c0,i2bh - _start + base_text, 0, DA_386IGate           ;usb ehci for the moment
+
+%rep (0x2f-0x2c)
 Gate selector_plain_c0, i2fh -_start + base_text, 0, DA_386IGate
 %endrep
 

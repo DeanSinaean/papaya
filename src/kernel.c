@@ -4,6 +4,7 @@
 #include<mm.h>
 #include<ku_utils.h>
 #include<fs.h>
+#include <stdint.h>
 extern int idle,p1,p2,sec_data;
 extern void tty(void);
 extern void tty1(void);
@@ -13,6 +14,7 @@ extern void hs(void);
 extern void t(void);
 extern void fs_ext(void);
 extern void mm(void);
+void findEhci();
 char cpu_string[16];
 void kernel_c(){
 	//init basic data&struct
@@ -26,6 +28,10 @@ void kernel_c(){
 	k_screen_reset();
 	detect_cpu();
 	oprintf("detecting cpu...cpu identify:%s\n",cpu_string);
+	//dean find ehci device
+	findEhci();
+	while(1);
+	//enddean
 //	oprintf("mm init..\nring0_pgdir:%x,ring0_pgtbl:%x,base_proc_pgdir:%x,addr_kernel_info:%x,pages:%x\n",RING0_PGDIR,RING0_PGTBL,BASE_PROC_PGDIR,ADDR_KERNEL_INFO,PAGES);
 	global_equal_map();
 	__asm__("mov $0x101000,%eax\t\n"
@@ -49,4 +55,3 @@ void kernel_c(){
 	__asm__("sti");
 	while(1);//内核陷入死循环，等待第一次时钟中断
 }
-

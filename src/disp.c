@@ -187,6 +187,18 @@ void write_asciis_buffer(unsigned x,unsigned val_type){
 			asciis_buffer[offset-1]='X';
 			asciis_buffer[offset-2]='0';
 			break;
+		case 'X':
+			while(temp>0xf){
+				unsigned i=temp%16;
+				asciis_buffer[offset]=i<=9?i+48:i+87;
+				temp/=16;
+				offset--;
+			}
+			/*Write 0X prefix for the lastascii */
+			asciis_buffer[offset]=temp<=9?temp+48:temp+87;
+			//asciis_buffer[offset-1]='X';
+			//asciis_buffer[offset-2]='0';
+			break;
 		default:
 			assert(0)
 			break;
@@ -199,17 +211,4 @@ void k_screen_reset(void){
 	set_cursor(0);
 	edi=0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
